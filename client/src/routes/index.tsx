@@ -22,7 +22,11 @@ function RouteComponent() {
     })
 
     const handleSeeDetailsClick = (id: string) => {
-        navigate({ to: '/movies/$id', params: { id } })
+        if(searchType === 'movies') {
+            navigate({ to: '/movies/$id', params: { id } })
+        } else {
+            navigate({ to: '/character/$id', params: { id } })
+        }
     }
 
     return (
