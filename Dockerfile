@@ -44,9 +44,18 @@ COPY --from=client-build /usr/src/app/client/dist ./server/public
 # Expose the port that the server runs on
 EXPOSE 3000
 
+# Change to server directory
+WORKDIR /usr/src/app/server
+
+# Create directory for database and set permissions
+RUN mkdir -p /usr/src/app/server/data && \
+    chown -R bun:bun /usr/src/app/server
+
+# Set environment variable for production
+ENV NODE_ENV=production
+
 # Set the user to bun for security
 USER bun
 
-# Change to server directory and start the application
-WORKDIR /usr/src/app/server
+# Start the application
 CMD ["bun", "run", "src/index.ts"]
