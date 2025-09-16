@@ -1,4 +1,5 @@
 import Button from '../../components/Button'
+import Card from '../../components/Card/Card';
 
 interface Props {
     results: { id: string; name: string }[]
@@ -14,7 +15,7 @@ export default function SearchResult({
     error,
 }: Props) {
     return (
-        <div className="bg-white rounded-lg shadow-lg p-10 h-[600px] w-[700px]">
+        <Card className="p-10 h-[600px] w-[700px]">
             <h3 className="text-lg font-bold pb-2 border-separator border-b-[0.5px]">
                 Results
             </h3>
@@ -57,6 +58,6 @@ export default function SearchResult({
                 </div>
             )}
             </div>
-        </div>
+        </Card>
     )
 }

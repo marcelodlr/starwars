@@ -1,6 +1,6 @@
-import { useState } from 'react'
 import Button from '../../components/Button'
 import type { SearchType } from './types'
+import Card from '../../components/Card/Card'
 
 interface Props {
     searchType: SearchType
@@ -35,7 +35,7 @@ export default function Search({
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-8 flex flex-col gap-4 w-[400px] self-start">
+        <Card className="p-8 flex flex-col gap-4 w-[400px] self-start">
             <h2 className="text-base font-semibold text-typography-primary">
                 What are you searching for?
             </h2>
@@ -86,6 +86,6 @@ export default function Search({
                 label="Search"
                 disabled={!searchQuery.trim()}
             />
-        </div>
+        </Card>
     )
 }

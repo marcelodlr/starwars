@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { getPerson } from '../../api'
 import Section from '../../components/Section'
 import Link from '../../components/Link'
+import Card from '../../components/Card/Card'
 
 export const Route = createFileRoute('/character/$id')({
   component: RouteComponent,
@@ -15,10 +16,10 @@ export const Route = createFileRoute('/character/$id')({
 function RouteComponent() {
   const character = Route.useLoaderData()
 
-   return <div className="flex flex-col gap-2 px-6 bg-white rounded-lg shadow-lg p-10 w-[700px] m-auto">
+   return <Card className="flex flex-col gap-2 px-6 p-10 w-[700px] m-auto">
       <h1 className="text-lg font-bold">{character.name}</h1>
       <div className="flex justify-between">
-        <div className="w-[50%] text-base">
+        <div className="w-[45%] text-base">
           <Section title="Details">
            <span>{`Birth Year: ${character.birth_year}`}</span>
            <span>{`Gender: ${character.gender}`}</span>
@@ -28,7 +29,7 @@ function RouteComponent() {
            <span>{`Mass: ${character.mass}`}</span>
           </Section>
         </div>
-        <div className="w-[50%] text-base">
+        <div className="w-[45%] text-base">
         <Section title="Movies">
         <div className="flex flex-wrap">
           {character.movies.map((movie, index) => (
@@ -41,5 +42,5 @@ function RouteComponent() {
         </Section>
         </div>
    </div>
-  </div>
+  </Card>
 }
