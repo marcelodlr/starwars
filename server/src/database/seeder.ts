@@ -1,9 +1,10 @@
 import httpClient from '../shared/httpClient';
 import { MovieDatabase } from '../movies/database';
 import { PeopleDatabase } from '../people/database';
-import type { BaseResponse, BasePaginatedResponse, BaseListResponse, BaseItem } from '../shared/httpClient';
+import { db } from './init';
+import type { BasePaginatedResponse, BaseListResponse, BaseItem } from '../shared/httpClient';
 import type { MovieProperties } from '../movies/service';
-import { getPeoplePaginated, type PersonProperties } from '../people/service';
+import { type PersonProperties } from '../people/service';
 import { getEntityId } from '~/shared/utils';
 
 export class DataSeeder {
@@ -12,14 +13,53 @@ export class DataSeeder {
   }
 
   static async seedDatabase(): Promise<void> {
-    console.log('🌱 Starting database seeding...');
+    console.log('Checking if database needs seeding...');
     
     try {
+      // Check if database already has data
+      if (this.isDatabaseSeeded()) {
+        console.log('Database already has data, skipping seeding');
+        return;
+      }
+
+      console.log('Starting database seeding...');
       await this.seedMovies();
       await this.seedPeople();
-      console.log('✅ Database seeding completed successfully!');
+      console.log('Database seeding completed successfully!');
     } catch (error) {
       console.error('Database seeding failed:', error);
+      throw error;
+    }
+  }
+
+  private static isDatabaseSeeded(): boolean {
+    try {
+      const movieCount = db.prepare(`
+        SELECT COUNT(*) as count FROM entities WHERE type = 'movie'
+      `).get() as { count: number };
+
+      const peopleCount = db.prepare(`
+        SELECT COUNT(*) as count FROM entities WHERE type = 'person'
+      `).get() as { count: number };
+
+      return movieCount.count > 0 && peopleCount.count > 0;
+    } catch (error) {
+      console.error('Error checking seeding status:', error);
+      return false;
+    }
+  }
+
+  private static clearDatabase(): void {
+    try {
+      console.log('Clearing all database tables...');
+      
+      // Clear all data from all tables
+      db.prepare(`DELETE FROM entities`).run();
+      db.prepare(`DELETE FROM request_events`).run();
+      
+      console.log('All database tables cleared');
+    } catch (error) {
+      console.error('Error clearing database:', error);
       throw error;
     }
   }
