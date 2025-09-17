@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { statisticsTableService } from '../database/statisticsTableService'
+import { getLatestStatistics } from './service'
 import { statisticsWorker } from '../workers/statisticsWorker'
 import { requestEventsService } from '../database/requestEventsService'
 
@@ -8,7 +8,7 @@ const statisticsRoutes = new Hono()
 // Get top 5 queries from precomputed statistics table
 statisticsRoutes.get('/', (c) => {
     try {
-        const stats = statisticsTableService.getLatestStatistics()
+        const stats = getLatestStatistics()
         
         if (!stats) {
             return c.json({

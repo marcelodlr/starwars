@@ -1,5 +1,5 @@
 import { requestEventsService } from '../database/requestEventsService'
-import { statisticsTableService } from '../database/statisticsTableService'
+import { insertStatistics, cleanupOldStatistics } from '../statistics/service'
 
 class StatisticsWorker {
     private intervalId: NodeJS.Timeout | null = null
@@ -41,27 +41,10 @@ class StatisticsWorker {
 
     private processStatistics() {
         try {
-            // Process any pending events in database
             this.processPendingEvents()
             
-            // Compute and store statistics for both time windows
             this.computeAndStoreStatistics()
 
-            // Log database event counts
-            const eventCounts = requestEventsService.getEventCountsByStatus()
-            console.log('Database event counts:', eventCounts)
-
-            // Cleanup old events (keep last 30 days)
-            const cleanedUp = requestEventsService.cleanupOldEvents(30)
-            if (cleanedUp > 0) {
-                console.log(`Cleaned up ${cleanedUp} old events`)
-            }
-
-            // Cleanup old statistics (keep last 7 days)
-            const statsCleanedUp = statisticsTableService.cleanupOldStatistics(7)
-            if (statsCleanedUp > 0) {
-                console.log(`Cleaned up ${statsCleanedUp} old statistics records`)
-            }
         } catch (error) {
             console.error('Error processing statistics:', error)
         }
@@ -73,7 +56,7 @@ class StatisticsWorker {
             
             const allTimeStats = this.computeStatisticsForTimeWindow()
             
-            statisticsTableService.insertStatistics({
+            insertStatistics({
                 top5_queries: allTimeStats.top5Queries,
                 total_requests: allTimeStats.totalRequests,
                 popular_characters: allTimeStats.popularCharacters,
@@ -104,7 +87,6 @@ class StatisticsWorker {
             const eventCounts = requestEventsService.getEventCountsByStatus()
             const totalRequests = eventCounts.processed || 0
 
-            // Get popular characters and movies (top 3 each)
             const popularCharacters = requestEventsService.getMostPopularCharacters()
             const popularMovies = requestEventsService.getMostPopularMovies()
 
@@ -132,7 +114,6 @@ class StatisticsWorker {
             if (pendingEvents.length > 0) {
                 console.log(`Found ${pendingEvents.length} pending events to process`)
                 
-                // Mark all pending events as processed since they're already in the database
                 for (const dbEvent of pendingEvents) {
                     try {
                         requestEventsService.markEventProcessed(dbEvent.id)
