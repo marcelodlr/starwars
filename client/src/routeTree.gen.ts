@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StatsIndexRouteImport } from './routes/stats/index'
 import { Route as MoviesIdRouteImport } from './routes/movies/$id'
 import { Route as CharacterIdRouteImport } from './routes/character/$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatsIndexRoute = StatsIndexRouteImport.update({
+  id: '/stats/',
+  path: '/stats/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MoviesIdRoute = MoviesIdRouteImport.update({
@@ -33,30 +39,34 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/character/$id': typeof CharacterIdRoute
   '/movies/$id': typeof MoviesIdRoute
+  '/stats': typeof StatsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/character/$id': typeof CharacterIdRoute
   '/movies/$id': typeof MoviesIdRoute
+  '/stats': typeof StatsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/character/$id': typeof CharacterIdRoute
   '/movies/$id': typeof MoviesIdRoute
+  '/stats/': typeof StatsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/character/$id' | '/movies/$id'
+  fullPaths: '/' | '/character/$id' | '/movies/$id' | '/stats'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/character/$id' | '/movies/$id'
-  id: '__root__' | '/' | '/character/$id' | '/movies/$id'
+  to: '/' | '/character/$id' | '/movies/$id' | '/stats'
+  id: '__root__' | '/' | '/character/$id' | '/movies/$id' | '/stats/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CharacterIdRoute: typeof CharacterIdRoute
   MoviesIdRoute: typeof MoviesIdRoute
+  StatsIndexRoute: typeof StatsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stats/': {
+      id: '/stats/'
+      path: '/stats'
+      fullPath: '/stats'
+      preLoaderRoute: typeof StatsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/movies/$id': {
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CharacterIdRoute: CharacterIdRoute,
   MoviesIdRoute: MoviesIdRoute,
+  StatsIndexRoute: StatsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
