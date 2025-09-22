@@ -78,8 +78,8 @@ class StatisticsWorker {
     private computeStatisticsForTimeWindow(): { 
         top5Queries: Array<{path: string, count: number}>, 
         totalRequests: number,
-        popularCharacters: Array<{characterId: string, requestCount: number}>,
-        popularMovies: Array<{movieId: string, requestCount: number}>
+        popularCharacters: Array<{characterId: string, requestCount: number, name: string}>,
+        popularMovies: Array<{movieId: string, requestCount: number, name: string}>
     } {
         try {
             const top5Queries = requestEventsService.getTop5Queries()

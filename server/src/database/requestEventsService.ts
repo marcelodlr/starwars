@@ -32,8 +32,8 @@ interface RequestEventQueries {
     selectRecentEventsStatement: Statement<DatabaseRequestEvent, [string]>
     countByStatusStatement: Statement<{ status: string, count: number }, []>
     selectTop5QueriesStatement: Statement<{ path: string, count: number }, []>
-    selectPopularCharactersStatement: Statement<{characterId: string, requestCount: number}, []>
-    selectPopularMoviesStatement: Statement<{movieId: string, requestCount: number}, []>
+    selectPopularCharactersStatement: Statement<{characterId: string, requestCount: number, name: string}, []>
+    selectPopularMoviesStatement: Statement<{movieId: string, requestCount: number, name: string}, []>
 }
 
 class RequestEventQueryManager {
@@ -87,24 +87,28 @@ class RequestEventQueryManager {
                 `),
                 selectPopularCharactersStatement: db.prepare(`
                     SELECT 
-                        SUBSTR(path, LENGTH('/api/people/') + 1) as characterId,
-                        COUNT(*) as requestCount
-                    FROM request_events 
-                    WHERE status = 'processed' 
-                    AND path LIKE '/api/people/%'
-                    AND path NOT LIKE '/api/people/%/%'
+                        SUBSTR(re.path, LENGTH('/api/people/') + 1) as characterId,
+                        COUNT(*) as requestCount,
+                        COALESCE(json_extract(e.data, '$.name'), 'Unknown') as name
+                    FROM request_events re
+                    LEFT JOIN entities e ON e.id = SUBSTR(re.path, LENGTH('/api/people/') + 1) AND e.type = 'person'
+                    WHERE re.status = 'processed' 
+                    AND re.path LIKE '/api/people/%'
+                    AND re.path NOT LIKE '/api/people/%/%'
                     GROUP BY characterId
                     ORDER BY requestCount DESC
                     LIMIT 3
                 `),
                 selectPopularMoviesStatement: db.prepare(`
                     SELECT 
-                        SUBSTR(path, LENGTH('/api/movies/') + 1) as movieId,
-                        COUNT(*) as requestCount
-                    FROM request_events 
-                    WHERE status = 'processed' 
-                    AND path LIKE '/api/movies/%'
-                    AND path NOT LIKE '/api/movies/%/%'
+                        SUBSTR(re.path, LENGTH('/api/movies/') + 1) as movieId,
+                        COUNT(*) as requestCount,
+                        COALESCE(json_extract(e.data, '$.title'), 'Unknown') as name
+                    FROM request_events re
+                    LEFT JOIN entities e ON e.id = SUBSTR(re.path, LENGTH('/api/movies/') + 1) AND e.type = 'movie'
+                    WHERE re.status = 'processed' 
+                    AND re.path LIKE '/api/movies/%'
+                    AND re.path NOT LIKE '/api/movies/%/%'
                     GROUP BY movieId
                     ORDER BY requestCount DESC
                     LIMIT 3
@@ -231,7 +235,7 @@ export class RequestEventsService {
     }
 
     // Get most popular characters (from /character/:id paths) - top 3
-    getMostPopularCharacters(): Array<{characterId: string, requestCount: number}> {
+    getMostPopularCharacters(): Array<{characterId: string, requestCount: number, name: string}> {
         try {
             return RequestEventQueryManager.queries.selectPopularCharactersStatement.all()
         } catch (error) {
@@ -241,7 +245,7 @@ export class RequestEventsService {
     }
 
     // Get most popular movies (from /film/:id paths) - top 3
-    getMostPopularMovies(): Array<{movieId: string, requestCount: number}> {
+    getMostPopularMovies(): Array<{movieId: string, requestCount: number, name: string}> {
         try {
             return RequestEventQueryManager.queries.selectPopularMoviesStatement.all()
         } catch (error) {
@@ -251,7 +255,7 @@ export class RequestEventsService {
     }
 
     // Get character and movie statistics combined - top 3 each
-    getContentPopularityStats(): {characters: Array<{characterId: string, requestCount: number}>, movies: Array<{movieId: string, requestCount: number}>} {
+    getContentPopularityStats(): {characters: Array<{characterId: string, requestCount: number, name: string}>, movies: Array<{movieId: string, requestCount: number, name: string}>} {
         try {
             const characters = this.getMostPopularCharacters()
             const movies = this.getMostPopularMovies()

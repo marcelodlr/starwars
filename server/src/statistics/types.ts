@@ -12,15 +12,15 @@ export interface DatabaseStatistics {
 export interface StatisticsInsert {
     top5_queries: Array<{path: string, count: number}>
     total_requests: number
-    popular_characters?: Array<{characterId: string, requestCount: number}>
-    popular_movies?: Array<{movieId: string, requestCount: number}>
+    popular_characters?: Array<{characterId: string, requestCount: number, name: string}>
+    popular_movies?: Array<{movieId: string, requestCount: number, name: string}>
     computed_at: Date
 }
 
 export interface ComputedStatistics {
-    top5_queries: Array<{path: string, count: number}>
+    top5_queries: Array<{path: string, count: number, name: string}>
     total_requests: number
-    popular_characters: Array<{characterId: string, requestCount: number}>
-    popular_movies: Array<{movieId: string, requestCount: number}>
+    popular_characters: Array<{characterId: string, requestCount: number, name: string}>
+    popular_movies: Array<{movieId: string, requestCount: number, name: string}>
     computed_at: Date
 }
